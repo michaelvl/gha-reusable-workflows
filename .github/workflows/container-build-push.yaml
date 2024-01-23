@@ -128,8 +128,8 @@ jobs:
 
       - name: Sign the images with GitHub OIDC token
         env:
-          DIGEST: ${{ jobs.push.outputs.digest }}
-          TAGS: ${{ steps.docker_meta.outputs.tags }}
+          DIGEST: ${{ jobs.build.outputs.digest }}
+          TAGS: ${{ jobs.build.outputs.tags }}
         run: |
           images=""
           for tag in ${TAGS}; do

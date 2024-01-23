@@ -111,6 +111,7 @@ jobs:
       packages: write
     runs-on: ubuntu-latest
     needs:
+      - build
       - push
     steps:
       - name: Checkout
@@ -137,4 +138,4 @@ jobs:
           for tag in ${TAGS}; do
             images+="${tag}@${DIGEST} "
           done
-          cosign sign --yes ${images}
+          echo cosign sign --yes ${images}

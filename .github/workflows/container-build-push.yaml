@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       metadata: ${{ steps.meta.outputs.json }}
-      tags: ${{ steps.meta.outputs.digest }}
+      tags: ${{ steps.meta.outputs.tags }}
     steps:
       - name: Checkout
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
@@ -131,6 +131,8 @@ jobs:
           DIGEST: ${{ needs.build.outputs.digest }}
           TAGS: ${{ needs.build.outputs.tags }}
         run: |
+          echo "${DIGEST}"
+          echo "${TAGS}"
           images=""
           for tag in ${TAGS}; do
             images+="${tag}@${DIGEST} "

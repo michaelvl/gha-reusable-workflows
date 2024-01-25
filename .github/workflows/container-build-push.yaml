@@ -5,6 +5,10 @@ on:
         description: "Version of crane to use"
         default: "v0.18.0"
         type: string
+      slsaContainerGeneratorVersion:
+        description: "Version of SLSA container generator to use"
+        default: "v1.9.0"
+        type: string
     outputs:
       digest:
         description: "Container image digest"
@@ -148,3 +152,54 @@ jobs:
             images+="${tag}@${DIGEST} "
           done
           cosign sign --yes ${images}
+
+  provenance:
+    permissions:
+      id-token: write
+      packages: write
+    runs-on: ubuntu-latest
+    needs:
+      - push
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - name: Cosign install
+        uses: sigstore/cosign-installer@9614fae9e5c5eddabb09f90a270fcb487c9f7149 # v3.3.0
+
+      - name: Download SLSA Generator
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release download \
+            --repo slsa-framework/slsa-github-generator \
+            --pattern slsa-generator-container-linux-amd64 "${{ inputs.slsaContainerGeneratorVersion }}"
+
+          chmod +x slsa-generator-container-linux-amd64
+          ./slsa-generator-container-linux-amd64 --help
+
+          mkdir -p $HOME/.bin/slsa-generator-container
+          mv ./slsa-generator-container-linux-amd64 $HOME/.bin/slsa-generator-container/slsa-generator-container
+          echo "$HOME/.bin/slsa-generator-container" >> $GITHUB_PATH
+
+      - name: Generate Provenance
+        env:
+          GITHUB_CONTEXT: "${{ toJSON(github) }}"
+        run: |
+          slsa-generator-container generate --predicate predicate.json
+          echo "Generated:"
+          cat predicate.json | jq .
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Attest Provenance
+        run: |
+          cosign attest --predicate="predicate.json" \
+            --type slsaprovenance \
+            --yes \
+            ghcr.io/${{ github.repository }}@${{ needs.push.outputs.digest }}

@@ -116,7 +116,22 @@ jobs:
           crane push /tmp/image.tar "${pushedImage}"
           echo "image=${pushedImage}" >> $GITHUB_OUTPUT
 
-      # FIXME - need to handle tags
+      - name: Add additional tags
+        env:
+          IMAGE_METADATA: ${{ needs.build.outputs.metadata }}
+        run: |
+          pushedImage=${{ steps.push.outputs.image }}
+
+          # add the remaining tags, skipping the tag that was pushed initially
+          printf "${IMAGE_METADATA}" | jq -rc '.tags | .[]' | while read taggedImage; do
+            if [[ "${taggedImage}" == "${pushedImage}" ]]; then
+              continue
+            fi
+
+            tag=$(printf "${taggedImage}" | awk -F "${image}:" '{print $2}')
+            echo "adding tag ${tag}"
+            crane tag "${pushedImage}" "${tag}"
+          done
 
   sign:
     permissions:

@@ -241,7 +241,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate SBOM
-        uses: anchore/sbom-action@v0.15.5 # v0.15.5
+        uses: anchore/sbom-action@v0.15.6 # v0.15.5
         with:
           image: ghcr.io/${{ github.repository }}@${{ needs.push.outputs.digest }}
           upload-artifact: false

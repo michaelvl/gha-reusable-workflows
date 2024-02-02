@@ -1,0 +1,48 @@
+on:
+  workflow_call:
+    inputs:
+      digest:
+        type: string
+        required: true
+        description: "Container digest"
+
+jobs:
+  scan:
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+    runs-on: ubuntu-latest
+    outputs:
+      metadata: ${{ steps.meta.outputs.json }}
+      tags: ${{ steps.meta.outputs.tags }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - name: Trivy Scan
+        uses: aquasecurity/trivy-action@d43c1f16c00cfd3978dde6c07f4bbcf9eb6993ca # 0.16.1
+        with:
+          image-ref: ghcr.io/${{ github.repository }}@${{ inputs.digest }}
+          format: 'cosign-vuln'
+          output: ./trivy.report.json
+        env:
+          TRIVY_USERNAME: ${{ github.actor }}
+          TRIVY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Cosign install
+        uses: sigstore/cosign-installer@9614fae9e5c5eddabb09f90a270fcb487c9f7149 # v3.3.0
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Attest Scan
+        run: |
+          cosign attest --predicate="trivy.report.json" \
+            --type vuln \
+            --yes \
+            ghcr.io/${{ github.repository }}@${{ inputs.digest }}

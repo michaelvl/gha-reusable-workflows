@@ -16,7 +16,7 @@ jobs:
       ref: ${{ steps.detect.outputs.ref }}
       workflow: ${{ steps.detect.outputs.workflow }}
     steps:
-      - name: Detect the repository and ref
+      - name: Detect this workflow repository and ref
         id: detect
         uses: slsa-framework/slsa-github-generator/.github/actions/detect-workflow-js@07e64b653f10a80b6510f4568f685f8b7b9ea830 # v1.9.0
 
@@ -38,12 +38,14 @@ jobs:
         with:
           repository: ${{ needs.detect-workflow.outputs.repository }}
           ref: ${{ needs.detect-workflow.outputs.ref }}
-          path: gha-reusable--workflows
+          path: gha-reusable-workflows
           persist-credentials: false
 
       - name: Policy check
         run: |
-          gha-reusable--workflows/scripts/vsa-poc.sh ghcr.io/${{ github.repository }} ${{ inputs.digest }} > vsa.json
+          echo "xx ${{ steps.detect-workflow.outputs.repository }}; ${{ steps.detect-workflow.outputs.ref }} ; ${{ steps.detect-workflow.outputs.workflow }}"
+          ls gha-reusable-workflows
+          gha-reusable-workflows/scripts/vsa-poc.sh ghcr.io/${{ github.repository }} ${{ inputs.digest }} > vsa.json
           cat vsa.json
 
       - name: Login to GitHub Container Registry

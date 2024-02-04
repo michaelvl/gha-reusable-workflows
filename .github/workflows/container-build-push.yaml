@@ -265,50 +265,50 @@ jobs:
           --yes \
           ghcr.io/${{ github.repository }}@${{ needs.push.outputs.digest }}
 
-  source-attestations:
-    permissions:
-      id-token: write
-      contents: read
-      packages: write
-      pull-requests: read
-    runs-on: ubuntu-latest
-    needs:
-    - push
-    - sbom # Avoid race condition on cosign tagging
-    steps:
-    - name: Checkout
-      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+  # source-attestations:
+  #   permissions:
+  #     id-token: write
+  #     contents: read
+  #     packages: write
+  #     pull-requests: read
+  #   runs-on: ubuntu-latest
+  #   needs:
+  #   - push
+  #   - sbom # Avoid race condition on cosign tagging
+  #   steps:
+  #   - name: Checkout
+  #     uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
-    - name: Cosign install
-      uses: sigstore/cosign-installer@9614fae9e5c5eddabb09f90a270fcb487c9f7149 # v3.3.0
+  #   - name: Cosign install
+  #     uses: sigstore/cosign-installer@9614fae9e5c5eddabb09f90a270fcb487c9f7149 # v3.3.0
 
-    - name: Login to GitHub Container Registry
-      uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
-      with:
-        registry: ghcr.io
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+  #   - name: Login to GitHub Container Registry
+  #     uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
+  #     with:
+  #       registry: ghcr.io
+  #       username: ${{ github.actor }}
+  #       password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Download Build Attestations
-      shell: bash
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        gh release download \
-          --repo liatrio/gh-trusted-builds-attestations \
-          --pattern "gh-trusted-builds-attestations_${{ inputs.githubAttestorVersion }}_linux_amd64.tar.gz" "v${{ inputs.githubAttestorVersion }}"
-        tar xvf "gh-trusted-builds-attestations_${{ inputs.githubAttestorVersion }}_linux_amd64.tar.gz"
-        mkdir -p $HOME/.bin/attestation
-        mv ./attestation $HOME/.bin/attestation
-        rm -rf gh-trusted-builds-attestations_${{ inputs.githubAttestorVersion }}_linux_amd64
-        rm "gh-trusted-builds-attestations_${{ inputs.githubAttestorVersion }}_linux_amd64.tar.gz"
-        echo "$HOME/.bin/attestation" >> $GITHUB_PATH
-        $HOME/.bin/attestation/attestation version
+  #   - name: Download Build Attestations
+  #     shell: bash
+  #     env:
+  #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #     run: |
+  #       gh release download \
+  #         --repo liatrio/gh-trusted-builds-attestations \
+  #         --pattern "gh-trusted-builds-attestations_${{ inputs.githubAttestorVersion }}_linux_amd64.tar.gz" "v${{ inputs.githubAttestorVersion }}"
+  #       tar xvf "gh-trusted-builds-attestations_${{ inputs.githubAttestorVersion }}_linux_amd64.tar.gz"
+  #       mkdir -p $HOME/.bin/attestation
+  #       mv ./attestation $HOME/.bin/attestation
+  #       rm -rf gh-trusted-builds-attestations_${{ inputs.githubAttestorVersion }}_linux_amd64
+  #       rm "gh-trusted-builds-attestations_${{ inputs.githubAttestorVersion }}_linux_amd64.tar.gz"
+  #       echo "$HOME/.bin/attestation" >> $GITHUB_PATH
+  #       $HOME/.bin/attestation/attestation version
 
-    - name: Pull Request Attestation
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        attestation github-pull-request \
-          --artifact-uri ghcr.io/${{ github.repository }} \
-          --artifact-digest ${{ needs.push.outputs.digest }} \
+  #   - name: Pull Request Attestation
+  #     env:
+  #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #     run: |
+  #       attestation github-pull-request \
+  #         --artifact-uri ghcr.io/${{ github.repository }} \
+  #         --artifact-digest ${{ needs.push.outputs.digest }} \

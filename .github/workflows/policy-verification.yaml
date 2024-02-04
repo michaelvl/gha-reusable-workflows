@@ -52,7 +52,7 @@ jobs:
         run: |
           echo "xx ${{ needs.detect-workflow.outputs.repository }}; ${{ needs.detect-workflow.outputs.ref }} ; ${{ needs.detect-workflow.outputs.workflow }}"
           ls gha-reusable-workflows
-          gha-reusable-workflows/scripts/vsa-poc.sh ghcr.io/${{ github.repository }} ${{ inputs.digest }} > vsa.json
+          gha-reusable-workflows/scripts/vsa-poc.sh "PASSED" "ghcr.io/${{ github.repository }}" "${{ inputs.digest }}" "${{ needs.detect-workflow.outputs.ref }}" > vsa.json
           cat vsa.json
 
       - name: Login to GitHub Container Registry

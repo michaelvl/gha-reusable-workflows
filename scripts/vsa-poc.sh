@@ -1,7 +1,9 @@
 #1 /bin/bash
 
-SUBJECT=abc
-DIGEST=def
+STATUS=$1
+SUBJECT=$2
+DIGEST=$3
+POLICY_DIGEST=$4
 
 NOW=$(date --iso-8601=seconds)
 
@@ -21,9 +23,9 @@ cat <<EOF
     "timeVerified": "$NOW",
     "policy": {
       "uri": "https://github.com/michaelvl/gha-reusable-workflows/organisation-policy",
-      "digest": {"sha256": "1234abcd"}
+      "digest": {"sha1": "$POLICY_DIGEST"}
     },
-    "verificationResult": "PASSED"
+    "verificationResult": "$STATUS"
   }
 }
 EOF

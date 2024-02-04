@@ -9,6 +9,11 @@ See e.g. [SLSA Supply chain threats](https://slsa.dev/spec/v1.0/threats-overview
 
 See also [example application pository](https://github.com/michaelvl/sigstore-in-toto-workshop).
 
+## Protections
+
+Note, that SLSA focus on the build-phase and does not cover source,
+i.e. tampering with the source prior to building.
+
 ## Links
 
 - GitHub attacks and protections

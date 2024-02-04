@@ -21,10 +21,6 @@ jobs:
         id: detect
         uses: slsa-framework/slsa-github-generator/.github/actions/detect-workflow-js@07e64b653f10a80b6510f4568f685f8b7b9ea830 # v1.9.0
 
-      - name: Debug
-        run: |
-          echo "xx ${{ steps.detect-workflow.outputs.repository }}; ${{ steps.detect-workflow.outputs.ref }} ; ${{ steps.detect-workflow.outputs.workflow }}"
-
   policy-verification:
     permissions:
       contents: read
@@ -50,9 +46,7 @@ jobs:
 
       - name: Policy check
         run: |
-          echo "xx ${{ needs.detect-workflow.outputs.repository }}; ${{ needs.detect-workflow.outputs.ref }} ; ${{ needs.detect-workflow.outputs.workflow }}"
-          ls gha-reusable-workflows
-          gha-reusable-workflows/scripts/vsa-poc.sh "PASSED" "ghcr.io/${{ github.repository }}" "${{ inputs.digest }}" "${{ needs.detect-workflow.outputs.ref }}" > vsa.json
+          gha-reusable-workflows/scripts/vsa-poc.sh "PASSED" "ghcr.io/${{ github.repository }}" "${{ inputs.digest }}" "${{ needs.detect-workflow.outputs.ref }}" "${{ needs.detect-workflow.outputs.ref }}" > vsa.json
           cat vsa.json
 
       - name: Login to GitHub Container Registry
@@ -62,7 +56,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Attest Scan
+      - name: Attest verification summary
         run: |
           cosign attest --predicate="vsa.json" \
             --type https://github.com/michaelvl/gha-reusable-workflows/organisation-policy \

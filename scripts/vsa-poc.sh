@@ -3,7 +3,8 @@
 STATUS=$1
 SUBJECT=$2
 DIGEST=$3
-POLICY_DIGEST=$4
+POLICY=$4
+POLICY_DIGEST=$5
 
 NOW=$(date --iso-8601=seconds)
 
@@ -18,11 +19,11 @@ cat <<EOF
   "predicateType": "https://slsa.dev/verification_summary/v1",
   "predicate": {
     "verifier": {
-      "id": "https://github.com/michaelvl/gha-reusable-workflows"
+      "id": "$POLICY"
     },
     "timeVerified": "$NOW",
     "policy": {
-      "uri": "https://github.com/michaelvl/gha-reusable-workflows/organisation-policy",
+      "uri": "$POLICY",
       "digest": {"sha1": "$POLICY_DIGEST"}
     },
     "verificationResult": "$STATUS"

@@ -30,35 +30,34 @@ jobs:
     needs:
     - detect-workflow
     steps:
-      - name: Checkout
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+    - name: Checkout
+      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
-      - name: Cosign install
-        uses: sigstore/cosign-installer@9614fae9e5c5eddabb09f90a270fcb487c9f7149 # v3.3.0
+    - name: Cosign install
+      uses: sigstore/cosign-installer@9614fae9e5c5eddabb09f90a270fcb487c9f7149 # v3.3.0
 
-      - name: Checkout Workflows Repo
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-        with:
-          repository: ${{ needs.detect-workflow.outputs.repository }}
-          ref: ${{ needs.detect-workflow.outputs.ref }}
-          path: gha-reusable-workflows
-          persist-credentials: false
+    - name: Checkout Workflows Repo
+      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      with:
+        repository: ${{ needs.detect-workflow.outputs.repository }}
+        ref: ${{ needs.detect-workflow.outputs.ref }}
+        path: gha-reusable-workflows
+        persist-credentials: false
 
-      - name: Policy check
-        run: |
-          gha-reusable-workflows/scripts/vsa-poc.sh "PASSED" "ghcr.io/${{ github.repository }}" "${{ inputs.digest }}" "${{ needs.detect-workflow.outputs.ref }}" "${{ needs.detect-workflow.outputs.ref }}" > vsa.json
-          cat vsa.json
+    - name: Policy check
+      run: |
+        gha-reusable-workflows/scripts/vsa-poc.sh "PASSED" "ghcr.io/${{ github.repository }}" "${{ inputs.digest }}" "${{ needs.detect-workflow.outputs.ref }}" "${{ needs.detect-workflow.outputs.ref }}" > vsa.json
 
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Attest verification summary
-        run: |
-          cosign attest --predicate="vsa.json" \
-            --type https://github.com/michaelvl/gha-reusable-workflows/organisation-policy \
-            --yes \
-            ghcr.io/${{ github.repository }}@${{ inputs.digest }}
+    - name: Attest verification summary
+      run: |
+        cosign attest --predicate="vsa.json" \
+          --type https://github.com/michaelvl/gha-reusable-workflows/organisation-policy \
+          --yes \
+          ghcr.io/${{ github.repository }}@${{ inputs.digest }}

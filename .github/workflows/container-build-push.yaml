@@ -19,6 +19,20 @@ on:
         value: ${{ jobs.push.outputs.digest }}
 
 jobs:
+  detect-workflow:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # Needed to detect the current reusable repository and ref
+    outputs:
+      repository: ${{ steps.detect.outputs.repository }}
+      ref: ${{ steps.detect.outputs.ref }}
+      workflow: ${{ steps.detect.outputs.workflow }}
+    steps:
+      - name: Detect this workflow repository and ref
+        id: detect
+        uses: slsa-framework/slsa-github-generator/.github/actions/detect-workflow-js@07e64b653f10a80b6510f4568f685f8b7b9ea830 # v1.9.0
+
   build:
     permissions:
       contents: read
@@ -265,50 +279,49 @@ jobs:
           --yes \
           ghcr.io/${{ github.repository }}@${{ needs.push.outputs.digest }}
 
-  # source-attestations:
-  #   permissions:
-  #     id-token: write
-  #     contents: read
-  #     packages: write
-  #     pull-requests: read
-  #   runs-on: ubuntu-latest
-  #   needs:
-  #   - push
-  #   - sbom # Avoid race condition on cosign tagging
-  #   steps:
-  #   - name: Checkout
-  #     uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+  source-attestations:
+    permissions:
+      id-token: write
+      contents: read
+      packages: write
+      pull-requests: read
+    runs-on: ubuntu-latest
+    needs:
+    - detect-workflow
+    - push
+    - sbom # Avoid race condition on cosign tagging
+    steps:
+    - name: Checkout
+      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
-  #   - name: Cosign install
-  #     uses: sigstore/cosign-installer@9614fae9e5c5eddabb09f90a270fcb487c9f7149 # v3.3.0
+    - name: Cosign install
+      uses: sigstore/cosign-installer@9614fae9e5c5eddabb09f90a270fcb487c9f7149 # v3.3.0
 
-  #   - name: Login to GitHub Container Registry
-  #     uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
-  #     with:
-  #       registry: ghcr.io
-  #       username: ${{ github.actor }}
-  #       password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Checkout Workflows Repo
+      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      with:
+        repository: ${{ needs.detect-workflow.outputs.repository }}
+        ref: ${{ needs.detect-workflow.outputs.ref }}
+        path: gha-reusable-workflows
+        persist-credentials: false
 
-  #   - name: Download Build Attestations
-  #     shell: bash
-  #     env:
-  #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #     run: |
-  #       gh release download \
-  #         --repo liatrio/gh-trusted-builds-attestations \
-  #         --pattern "gh-trusted-builds-attestations_${{ inputs.githubAttestorVersion }}_linux_amd64.tar.gz" "v${{ inputs.githubAttestorVersion }}"
-  #       tar xvf "gh-trusted-builds-attestations_${{ inputs.githubAttestorVersion }}_linux_amd64.tar.gz"
-  #       mkdir -p $HOME/.bin/attestation
-  #       mv ./attestation $HOME/.bin/attestation
-  #       rm -rf gh-trusted-builds-attestations_${{ inputs.githubAttestorVersion }}_linux_amd64
-  #       rm "gh-trusted-builds-attestations_${{ inputs.githubAttestorVersion }}_linux_amd64.tar.gz"
-  #       echo "$HOME/.bin/attestation" >> $GITHUB_PATH
-  #       $HOME/.bin/attestation/attestation version
+    - name: PR provenance
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        gha-reusable-workflows/scripts/pr-provenance-poc.sh "${{ github.repositoryUrl }}" "${{ github.ref }}" "${{ github.sha }}" > pr.json
+        cat pr.json
 
-  #   - name: Pull Request Attestation
-  #     env:
-  #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #     run: |
-  #       attestation github-pull-request \
-  #         --artifact-uri ghcr.io/${{ github.repository }} \
-  #         --artifact-digest ${{ needs.push.outputs.digest }} \
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Attest PR provenance
+      run: |
+        cosign attest --predicate="pr.json" \
+          --type https://github.com/michaelvl/gha-reusable-workflows/pr-provenance \
+          --yes \
+          ghcr.io/${{ github.repository }}@${{ needs.push.outputs.digest }}

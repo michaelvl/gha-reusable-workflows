@@ -10,7 +10,8 @@ jobs:
   detect-workflow:
     runs-on: ubuntu-latest
     permissions:
-      id-token: write # needed to grab job_workflow_ref information
+      contents: read
+      id-token: write # Needed to detect the current reusable repository and ref
     outputs:
       repository: ${{ steps.detect.outputs.repository }}
       ref: ${{ steps.detect.outputs.ref }}
@@ -20,12 +21,18 @@ jobs:
         id: detect
         uses: slsa-framework/slsa-github-generator/.github/actions/detect-workflow-js@07e64b653f10a80b6510f4568f685f8b7b9ea830 # v1.9.0
 
+      - name: Debug
+        run: |
+          echo "xx ${{ steps.detect-workflow.outputs.repository }}; ${{ steps.detect-workflow.outputs.ref }} ; ${{ steps.detect-workflow.outputs.workflow }}"
+
   policy-verification:
     permissions:
       contents: read
       id-token: write
       packages: write
     runs-on: ubuntu-latest
+    needs:
+    - detect-workflow
     steps:
       - name: Checkout
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
@@ -43,7 +50,7 @@ jobs:
 
       - name: Policy check
         run: |
-          echo "xx ${{ steps.detect-workflow.outputs.repository }}; ${{ steps.detect-workflow.outputs.ref }} ; ${{ steps.detect-workflow.outputs.workflow }}"
+          echo "xx ${{ needs.detect-workflow.outputs.repository }}; ${{ needs.detect-workflow.outputs.ref }} ; ${{ needs.detect-workflow.outputs.workflow }}"
           ls gha-reusable-workflows
           gha-reusable-workflows/scripts/vsa-poc.sh ghcr.io/${{ github.repository }} ${{ inputs.digest }} > vsa.json
           cat vsa.json

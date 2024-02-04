@@ -1,0 +1,61 @@
+on:
+  workflow_call:
+    inputs:
+      digest:
+        type: string
+        required: true
+        description: "Container digest"
+
+jobs:
+  detect-workflow:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # needed to grab job_workflow_ref information
+    outputs:
+      repository: ${{ steps.detect.outputs.repository }}
+      ref: ${{ steps.detect.outputs.ref }}
+      workflow: ${{ steps.detect.outputs.workflow }}
+    steps:
+      - name: Detect the repository and ref
+        id: detect
+        uses: slsa-framework/slsa-github-generator/.github/actions/detect-workflow-js@07e64b653f10a80b6510f4568f685f8b7b9ea830 # v1.9.0
+
+  policy-verification:
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - name: Cosign install
+        uses: sigstore/cosign-installer@9614fae9e5c5eddabb09f90a270fcb487c9f7149 # v3.3.0
+
+      - name: Checkout Workflows Repo
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          repository: ${{ needs.detect-workflow.outputs.repository }}
+          ref: ${{ needs.detect-workflow.outputs.ref }}
+          path: gha-reusable--workflows
+          persist-credentials: false
+
+      - name: Policy check
+        run: |
+          gha-reusable--workflows/scripts/vsa-poc.sh ghcr.io/${{ github.repository }} ${{ inputs.digest }} > vsa.json
+          cat vsa.json
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Attest Scan
+        run: |
+          cosign attest --predicate="vsa.json" \
+            --type https://github.com/michaelvl/gha-reusable-workflows/organisation-policy \
+            --yes \
+            ghcr.io/${{ github.repository }}@${{ inputs.digest }}

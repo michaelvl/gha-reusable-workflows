@@ -46,7 +46,7 @@ jobs:
 
     - name: Policy check
       run: |
-        gha-reusable-workflows/scripts/vsa-poc.sh "PASSED" "ghcr.io/${{ github.repository }}" "${{ inputs.digest }}" "${{ needs.detect-workflow.outputs.ref }}" "${{ needs.detect-workflow.outputs.ref }}" > vsa.json
+        gha-reusable-workflows/scripts/vsa-poc.sh "PASSED" "${{ needs.detect-workflow.outputs.repository }}" "${{ needs.detect-workflow.outputs.ref }}" > vsa.json
 
     - name: Login to GitHub Container Registry
       uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0

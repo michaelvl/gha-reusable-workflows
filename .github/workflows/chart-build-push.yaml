@@ -1,0 +1,74 @@
+on:
+  workflow_call:
+    inputs:
+      chartDir:
+        description: "Base directory of chart, typically 'charts'"
+        type: string
+      chartName:
+        description: "Name of chart to build"
+        type: string
+      chartRegistryName:
+        description: "Char container registry nane and repository package name, typically repository name with '-helm' suffix"
+        type: string
+      craneVersion:
+        description: "Version of crane to use"
+        default: "0.18.0"
+        type: string
+      helmVersion:
+        description: "Version of Helm to use"
+        default: "v3.14.1"
+        type: string
+      githubAttestorVersion:
+        description: "Version of GitHub attestor to use"
+        default: "1.1.4"
+        type: string
+    outputs:
+      digest:
+        description: "Container image digest"
+        value: ${{ jobs.push.outputs.digest }}
+
+jobs:
+  detect-workflow:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # Needed to detect the current reusable repository and ref
+      packages: write
+    outputs:
+      repository: ${{ steps.detect.outputs.repository }}
+      ref: ${{ steps.detect.outputs.ref }}
+      workflow: ${{ steps.detect.outputs.workflow }}
+    steps:
+      - name: Detect this workflow repository and ref
+        id: detect
+        uses: slsa-framework/slsa-github-generator/.github/actions/detect-workflow-js@07e64b653f10a80b6510f4568f685f8b7b9ea830 # v1.9.0
+
+  build:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    outputs:
+      metadata: ${{ steps.meta.outputs.json }}
+      tags: ${{ steps.meta.outputs.tags }}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+    - name: Install Helm
+      uses: azure/setup-helm@5119fcb9089d432beecbf79bb2c7915207344b78 # v3.5
+      with:
+        version: {{ inputs.helmVersion }}
+
+    - name: Package chart
+      run: |
+        helm package {{ inputs.chartDir }}/{{ inputs.chartName }}
+
+    - name: login to ghcr.io using helm
+      run: |
+        echo ${{ secrets.GITHUB_TOKEN }} | helm registry login {{ inputs.chartRegistryName }} --username ${{ github.repository_owner }} --password-stdin
+
+    - name: Push chart
+      run: |
+        VERSION=$(cat {{ inputs.chartDir }}/{{ inputs.chartName }}/Chart.yaml | awk -F "[, ]+" '/version/{print $NF}')
+        helm push "{{ inputs.chartName }}-$VERSION.tgz" oci://{{ inputs.chartRegistryName }} 2>&1 | tee helm-push-out.txt
+        echo "chartVersion=$VERSION" >> $GITHUB_OUTPUT

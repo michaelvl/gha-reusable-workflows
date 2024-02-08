@@ -1,0 +1,314 @@
+on:
+  workflow_call:
+    inputs:
+      craneVersion:
+        description: "Version of crane to use"
+        default: "0.18.0"
+        type: string
+      slsaContainerGeneratorVersion:
+        description: "Version of SLSA container generator to use"
+        default: "1.9.0"
+        type: string
+      githubAttestorVersion:
+        description: "Version of GitHub attestor to use"
+        default: "1.1.4"
+        type: string
+    outputs:
+      digest:
+        description: "Container image digest"
+        value: ${{ jobs.push.outputs.digest }}
+
+jobs:
+  build:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    outputs:
+      metadata: ${{ steps.meta.outputs.json }}
+      tags: ${{ steps.meta.outputs.tags }}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+    - name: Set up docker buildx
+      uses: docker/setup-buildx-action@f95db51fddba0c2d1ec667646a06c2ce06100226 # v3.0.0
+
+    - name: Image metadata
+      id: meta
+      uses: docker/metadata-action@dbef88086f6cef02e264edb7dbf63250c17cef6c # v5.5.0
+      with:
+        images: ghcr.io/${{ github.repository }}
+        tags: |
+          type=raw,value=latest,enable={{is_default_branch}}
+          type=ref,event=branch
+          type=ref,event=pr
+          type=sha,prefix=
+
+    - name: DEBUG Show image metadata
+      env:
+        IMAGE_METADATA: ${{ needs.build.outputs.metadata }}
+      run: |
+        printf "${IMAGE_METADATA}" | jq .
+
+    - name: Build Image
+      id: container
+      uses: docker/build-push-action@4a13e500e55cf31b7a5d59a38ab2040ab0f42f56 # v5.1.0
+      with:
+        context: .
+        push: false
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        outputs: type=docker,dest=/tmp/image.tar
+
+    - name: Upload image archive
+      uses: actions/upload-artifact@26f96dfa697d77e81fd5907df203aa23a56210a8 # v4.3.0
+      with:
+        name: image
+        path: /tmp/image.tar
+
+  push:
+    permissions:
+      packages: write
+    runs-on: ubuntu-latest
+    needs:
+    - build
+    outputs:
+      digest: ${{ steps.digest.outputs.digest }}
+    steps:
+    - name: Download image archive
+      uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935 # v4.1.1
+      with:
+        name: image
+        path: /tmp
+
+    - name: Install Crane
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        cd $(mktemp -d)
+        gh release download \
+        --repo google/go-containerregistry \
+        --pattern "go-containerregistry_Linux_x86_64.tar.gz" "v${{ inputs.craneVersion }}"
+        tar xvf go-containerregistry_Linux_x86_64.tar.gz
+        mkdir -p $HOME/.bin/crane
+        mv ./crane $HOME/.bin/crane
+        echo "$HOME/.bin/crane" >> $GITHUB_PATH
+        $HOME/.bin/crane/crane version
+
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Compute digest
+      id: digest
+      run: |
+        localDigest=$(crane digest --tarball /tmp/image.tar)
+        echo "locally-computed digest: ${localDigest}"
+        echo "digest=${localDigest}" >> $GITHUB_OUTPUT
+
+    - name: Push Image
+      id: push
+      env:
+        IMAGE_METADATA: ${{ needs.build.outputs.metadata }}
+      run: |
+        commit="${{ github.sha }}"
+        pushedImage=$(printf "${IMAGE_METADATA}" | jq --arg commit "${commit::7}" -r '.tags | .[] | select(.|endswith($commit))')
+        echo "Pushing ${pushedImage}"
+        crane push /tmp/image.tar "${pushedImage}"
+        echo "image=${pushedImage}" >> $GITHUB_OUTPUT
+
+    - name: Add additional tags
+      env:
+        IMAGE_METADATA: ${{ needs.build.outputs.metadata }}
+      run: |
+        pushedImage=${{ steps.push.outputs.image }}
+
+        # add the remaining tags, skipping the tag that was pushed initially
+        printf "${IMAGE_METADATA}" | jq -rc '.tags | .[]' | while read taggedImage; do
+          if [[ "${taggedImage}" == "${pushedImage}" ]]; then
+            continue
+          fi
+
+          tag=$(printf "${taggedImage}" | awk -F "${image}:" '{print $2}')
+          echo "adding tag ${tag}"
+          crane tag "${pushedImage}" "${tag}"
+        done
+
+  sign:
+    permissions:
+      id-token: write
+      packages: write
+    runs-on: ubuntu-latest
+    needs:
+    - build
+    - push
+    steps:
+    - name: Checkout
+      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+    - name: Cosign install
+      uses: sigstore/cosign-installer@9614fae9e5c5eddabb09f90a270fcb487c9f7149 # v3.3.0
+
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Sign the images with GitHub OIDC token
+      env:
+        DIGEST: ${{ needs.push.outputs.digest }}
+        TAGS: ${{ needs.build.outputs.tags }}
+      run: |
+        echo "${DIGEST}"
+        echo "${TAGS}"
+        images=""
+        for tag in ${TAGS}; do
+          images+="${tag}@${DIGEST} "
+        done
+        cosign sign --yes ${images}
+
+  provenance:
+    permissions:
+      id-token: write
+      packages: write
+    runs-on: ubuntu-latest
+    needs:
+    - push
+    - sign # Avoid race condition on cosign tagging
+    steps:
+    - name: Checkout
+      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+    - name: Cosign install
+      uses: sigstore/cosign-installer@9614fae9e5c5eddabb09f90a270fcb487c9f7149 # v3.3.0
+
+    - name: Download SLSA Generator
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        gh release download \
+          --repo slsa-framework/slsa-github-generator \
+          --pattern slsa-generator-container-linux-amd64 "v${{ inputs.slsaContainerGeneratorVersion }}"
+
+        chmod +x slsa-generator-container-linux-amd64
+        ./slsa-generator-container-linux-amd64 --help
+
+        mkdir -p $HOME/.bin/slsa-generator-container
+        mv ./slsa-generator-container-linux-amd64 $HOME/.bin/slsa-generator-container/slsa-generator-container
+        echo "$HOME/.bin/slsa-generator-container" >> $GITHUB_PATH
+
+    - name: Generate Provenance
+      env:
+        GITHUB_CONTEXT: "${{ toJSON(github) }}"
+      run: |
+        slsa-generator-container generate --predicate predicate.json
+        echo "Generated:"
+        cat predicate.json | jq .
+
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Attest Provenance
+      run: |
+        cosign attest --predicate="predicate.json" \
+          --type slsaprovenance \
+          --yes \
+          ghcr.io/${{ github.repository }}@${{ needs.push.outputs.digest }}
+
+  sbom:
+    permissions:
+      id-token: write
+      packages: write
+    runs-on: ubuntu-latest
+    needs:
+    - push
+    - provenance # Avoid race condition on cosign tagging
+    steps:
+    - name: Checkout
+      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+    - name: Cosign install
+      uses: sigstore/cosign-installer@9614fae9e5c5eddabb09f90a270fcb487c9f7149 # v3.3.0
+
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Generate SBOM
+      uses: anchore/sbom-action@b6a39da80722a2cb0ef5d197531764a89b5d48c3 # v0.15.8
+      with:
+        image: ghcr.io/${{ github.repository }}@${{ needs.push.outputs.digest }}
+        upload-artifact: false
+        output-file: sbom.spdx.json
+
+    - name: Show SBOM
+      run: |
+        echo "Generated:"
+        cat sbom.spdx.json | jq .
+
+    - name: Attest SBOM
+      run: |
+        cosign attest --predicate="sbom.spdx.json" \
+          --type spdxjson \
+          --yes \
+          ghcr.io/${{ github.repository }}@${{ needs.push.outputs.digest }}
+
+  # source-attestations:
+  #   permissions:
+  #     id-token: write
+  #     contents: read
+  #     packages: write
+  #     pull-requests: read
+  #   runs-on: ubuntu-latest
+  #   needs:
+  #   - push
+  #   - sbom # Avoid race condition on cosign tagging
+  #   steps:
+  #   - name: Checkout
+  #     uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+  #   - name: Cosign install
+  #     uses: sigstore/cosign-installer@9614fae9e5c5eddabb09f90a270fcb487c9f7149 # v3.3.0
+
+  #   - name: Login to GitHub Container Registry
+  #     uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
+  #     with:
+  #       registry: ghcr.io
+  #       username: ${{ github.actor }}
+  #       password: ${{ secrets.GITHUB_TOKEN }}
+
+  #   - name: Download Build Attestations
+  #     shell: bash
+  #     env:
+  #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #     run: |
+  #       gh release download \
+  #         --repo liatrio/gh-trusted-builds-attestations \
+  #         --pattern "gh-trusted-builds-attestations_${{ inputs.githubAttestorVersion }}_linux_amd64.tar.gz" "v${{ inputs.githubAttestorVersion }}"
+  #       tar xvf "gh-trusted-builds-attestations_${{ inputs.githubAttestorVersion }}_linux_amd64.tar.gz"
+  #       mkdir -p $HOME/.bin/attestation
+  #       mv ./attestation $HOME/.bin/attestation
+  #       rm -rf gh-trusted-builds-attestations_${{ inputs.githubAttestorVersion }}_linux_amd64
+  #       rm "gh-trusted-builds-attestations_${{ inputs.githubAttestorVersion }}_linux_amd64.tar.gz"
+  #       echo "$HOME/.bin/attestation" >> $GITHUB_PATH
+  #       $HOME/.bin/attestation/attestation version
+
+  #   - name: Pull Request Attestation
+  #     env:
+  #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #     run: |
+  #       attestation github-pull-request \
+  #         --artifact-uri ghcr.io/${{ github.repository }} \
+  #         --artifact-digest ${{ needs.push.outputs.digest }} \

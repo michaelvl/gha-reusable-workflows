@@ -7,16 +7,13 @@ on:
       chartName:
         description: "Name of chart to build"
         type: string
-      chartRegistryName:
-        description: "Char container registry nane and repository package name, typically repository name with '-helm' suffix"
-        type: string
       craneVersion:
         description: "Version of crane to use"
         default: "0.18.0"
         type: string
       helmVersion:
         description: "Version of Helm to use"
-        default: "v3.14.1"
+        default: "3.14.0"
         type: string
       githubAttestorVersion:
         description: "Version of GitHub attestor to use"
@@ -46,6 +43,8 @@ jobs:
   build:
     permissions:
       contents: read
+      id-token: write
+      packages: write
     runs-on: ubuntu-latest
     outputs:
       metadata: ${{ steps.meta.outputs.json }}
@@ -57,18 +56,18 @@ jobs:
     - name: Install Helm
       uses: azure/setup-helm@5119fcb9089d432beecbf79bb2c7915207344b78 # v3.5
       with:
-        version: "{{ inputs.helmVersion }}"
+        version: ${{ inputs.helmVersion }}
 
     - name: Package chart
       run: |
-        helm package {{ inputs.chartDir }}/{{ inputs.chartName }}
+        helm package ${{ inputs.chartDir }}/${{ inputs.chartName }}
 
     - name: login to ghcr.io using helm
       run: |
-        echo ${{ secrets.GITHUB_TOKEN }} | helm registry login {{ inputs.chartRegistryName }} --username ${{ github.repository_owner }} --password-stdin
+        echo ${{ secrets.GITHUB_TOKEN }} | helm registry login ghcr.io --username ${{ github.repository_owner }} --password-stdin
 
     - name: Push chart
       run: |
-        VERSION=$(cat {{ inputs.chartDir }}/{{ inputs.chartName }}/Chart.yaml | awk -F "[, ]+" '/version/{print $NF}')
-        helm push "{{ inputs.chartName }}-$VERSION.tgz" oci://{{ inputs.chartRegistryName }} 2>&1 | tee helm-push-out.txt
+        VERSION=$(cat ${{ inputs.chartDir }}/${{ inputs.chartName }}/Chart.yaml | awk -F "[, ]+" '/version/{print $NF}')
+        helm push "${{ inputs.chartName }}-$VERSION.tgz" oci://ghcr.io/${{ github.repository_owner }} 2>&1 | tee helm-push-out.txt
         echo "chartVersion=$VERSION" >> $GITHUB_OUTPUT

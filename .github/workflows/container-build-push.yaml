@@ -305,7 +305,7 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        gha-reusable-workflows/scripts/pr-provenance-poc.sh "${{ github.repositoryUrl }}" "${{ github.ref }}" "${{ github.sha }}" > pr.json
+        gha-reusable-workflows/scripts/pr-provenance.sh "${{ github.repository_owner }}" "${{ github.event.repository.name }}" "${{ github.ref }}" "${{ github.sha }}" > pr.json
         cat pr.json
 
     - name: Login to GitHub Container Registry

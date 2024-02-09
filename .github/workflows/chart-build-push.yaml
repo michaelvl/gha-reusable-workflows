@@ -43,12 +43,13 @@ jobs:
   build:
     permissions:
       contents: read
-      id-token: write
+      id-token: none
       packages: write
     runs-on: ubuntu-latest
     outputs:
-      metadata: ${{ steps.meta.outputs.json }}
-      tags: ${{ steps.meta.outputs.tags }}
+      chartVersion: ${{ steps.push.outputs.chartVersion }}
+      digest: ${{ steps.meta.outputs.digest }}
+      chart: ${{ steps.meta.outputs.chart }}
     steps:
     - name: Checkout
       uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
@@ -57,6 +58,20 @@ jobs:
       uses: azure/setup-helm@5119fcb9089d432beecbf79bb2c7915207344b78 # v3.5
       with:
         version: ${{ inputs.helmVersion }}
+
+    - name: Install Crane
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        cd $(mktemp -d)
+        gh release download \
+        --repo google/go-containerregistry \
+        --pattern "go-containerregistry_Linux_x86_64.tar.gz" "v${{ inputs.craneVersion }}"
+        tar xvf go-containerregistry_Linux_x86_64.tar.gz
+        mkdir -p $HOME/.bin/crane
+        mv ./crane $HOME/.bin/crane
+        echo "$HOME/.bin/crane" >> $GITHUB_PATH
+        $HOME/.bin/crane/crane version
 
     - name: Package chart
       run: |
@@ -67,7 +82,50 @@ jobs:
         echo ${{ secrets.GITHUB_TOKEN }} | helm registry login ghcr.io --username ${{ github.repository_owner }} --password-stdin
 
     - name: Push chart
+      id: push
       run: |
         VERSION=$(cat ${{ inputs.chartDir }}/${{ inputs.chartName }}/Chart.yaml | awk -F "[, ]+" '/version/{print $NF}')
         helm push "${{ inputs.chartName }}-$VERSION.tgz" oci://ghcr.io/${{ github.repository_owner }} 2>&1 | tee helm-push-out.txt
         echo "chartVersion=$VERSION" >> $GITHUB_OUTPUT
+
+    - name: Chart meta
+      id: meta
+      run: |
+        DIGEST=$(cat helm-push-out.txt | awk -F "[, ]+" '/Digest/{print $NF}')
+        echo "digest=$DIGEST" >> $GITHUB_OUTPUT
+        CHART=$(echo ghcr.io/${{ github.repository }}-helm | tr '[:upper:]' '[:lower:]')
+        echo "chart=$CHART@$DIGEST" >> $GITHUB_OUTPUT
+
+    - name: Login to GitHub Container Registry using Docker
+      uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Add additional tags
+      run: |
+        crane tag "${{ steps.meta.outputs.chart }}" "${{ steps.push.outputs.chartVersion }}"
+        crane tag "${{ steps.meta.outputs.chart }}" latest
+
+  sign:
+    permissions:
+      contents: none
+      packages: write
+      id-token: write
+    runs-on: ubuntu-latest
+    needs:
+    - build
+    steps:
+    - name: Cosign install
+      uses: sigstore/cosign-installer@9614fae9e5c5eddabb09f90a270fcb487c9f7149 # v3.3.0
+
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Sign chart
+      run: cosign sign --yes -a "chartVersion=${{ needs.build.outputs.chartVersion }}" "${{ needs.build.outputs.chart }}"

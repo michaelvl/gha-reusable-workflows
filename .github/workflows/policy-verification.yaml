@@ -58,6 +58,6 @@ jobs:
     - name: Attest verification summary
       run: |
         cosign attest --predicate="vsa.json" \
-          --type https://github.com/michaelvl/gha-reusable-workflows/organisation-policy \
+          --type "https://slsa.dev/verification_summary/v1" \
           --yes \
           ghcr.io/${{ github.repository }}@${{ inputs.digest }}

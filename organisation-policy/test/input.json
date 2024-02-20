@@ -1,0 +1,596 @@
+{
+  "prov": {
+    "_type": "https://in-toto.io/Statement/v0.1",
+    "predicate": {
+      "buildType": "https://github.com/slsa-framework/slsa-github-generator/container@v1",
+      "builder": {
+        "id": "https://github.com/michaelvl/gha-reusable-workflows/.github/workflows/container-build-push.yaml@refs/heads/main"
+      },
+      "invocation": {
+        "configSource": {
+          "digest": {
+            "sha1": "bd996cf46b61474143057edbee8d0a26ee20632f"
+          },
+          "entryPoint": ".github/workflows/build-and-push.yml",
+          "uri": "git+https://github.com/michaelvl/sigstore-in-toto-workshop@refs/heads/main"
+        },
+        "environment": {
+          "github_actor": "michaelvl",
+          "github_actor_id": "6823408",
+          "github_base_ref": "",
+          "github_event_name": "push",
+          "github_event_payload": {
+            "after": "bd996cf46b61474143057edbee8d0a26ee20632f",
+            "base_ref": null,
+            "before": "56b33950e212295da017fb262dabb72d498c6a9b",
+            "commits": [
+              {
+                "author": {
+                  "email": "mvl.gh@network42.dk",
+                  "name": "michaelvl",
+                  "username": "michaelvl"
+                },
+                "committer": {
+                  "email": "mvl.gh@network42.dk",
+                  "name": "michaelvl",
+                  "username": "michaelvl"
+                },
+                "distinct": true,
+                "id": "bd996cf46b61474143057edbee8d0a26ee20632f",
+                "message": "Change delay to 2s",
+                "timestamp": "2024-02-08T19:22:21+01:00",
+                "tree_id": "406de0449bcd3a7d33843a1e33fb995e5d9f05f9",
+                "url": "https://github.com/michaelvl/sigstore-in-toto-workshop/commit/bd996cf46b61474143057edbee8d0a26ee20632f"
+              }
+            ],
+            "compare": "https://github.com/michaelvl/sigstore-in-toto-workshop/compare/56b33950e212...bd996cf46b61",
+            "created": false,
+            "deleted": false,
+            "forced": true,
+            "head_commit": {
+              "author": {
+                "email": "mvl.gh@network42.dk",
+                "name": "michaelvl",
+                "username": "michaelvl"
+              },
+              "committer": {
+                "email": "mvl.gh@network42.dk",
+                "name": "michaelvl",
+                "username": "michaelvl"
+              },
+              "distinct": true,
+              "id": "bd996cf46b61474143057edbee8d0a26ee20632f",
+              "message": "Change delay to 2s",
+              "timestamp": "2024-02-08T19:22:21+01:00",
+              "tree_id": "406de0449bcd3a7d33843a1e33fb995e5d9f05f9",
+              "url": "https://github.com/michaelvl/sigstore-in-toto-workshop/commit/bd996cf46b61474143057edbee8d0a26ee20632f"
+            },
+            "pusher": {
+              "email": "mvl.gh@network42.dk",
+              "name": "michaelvl"
+            },
+            "ref": "refs/heads/main",
+            "repository": {
+              "allow_forking": true,
+              "archive_url": "https://api.github.com/repos/michaelvl/sigstore-in-toto-workshop/{archive_format}{/ref}",
+              "archived": false,
+              "assignees_url": "https://api.github.com/repos/michaelvl/sigstore-in-toto-workshop/assignees{/user}",
+              "blobs_url": "https://api.github.com/repos/michaelvl/sigstore-in-toto-workshop/git/blobs{/sha}",
+              "branches_url": "https://api.github.com/repos/michaelvl/sigstore-in-toto-workshop/branches{/branch}",
+              "clone_url": "https://github.com/michaelvl/sigstore-in-toto-workshop.git",
+              "collaborators_url": "https://api.github.com/repos/michaelvl/sigstore-in-toto-workshop/collaborators{/collaborator}",
+              "comments_url": "https://api.github.com/repos/michaelvl/sigstore-in-toto-workshop/comments{/number}",
+              "commits_url": "https://api.github.com/repos/michaelvl/sigstore-in-toto-workshop/commits{/sha}",
+              "compare_url": "https://api.github.com/repos/michaelvl/sigstore-in-toto-workshop/compare/{base}...{head}",
+              "contents_url": "https://api.github.com/repos/michaelvl/sigstore-in-toto-workshop/contents/{+path}",
+              "contributors_url": "https://api.github.com/repos/michaelvl/sigstore-in-toto-workshop/contributors",
+              "created_at": 1705855005,
+              "default_branch": "main",
+              "deployments_url": "https://api.github.com/repos/michaelvl/sigstore-in-toto-workshop/deployments",
+              "description": "Sigstore and in-toto workshop",
+              "disabled": false,
+              "downloads_url": "https://api.github.com/repos/michaelvl/sigstore-in-toto-workshop/downloads",
+              "events_url": "https://api.github.com/repos/michaelvl/sigstore-in-toto-workshop/events",
+              "fork": false,
+              "forks": 0,
+              "forks_count": 0,
+              "forks_url": "https://api.github.com/repos/michaelvl/sigstore-in-toto-workshop/forks",
+              "full_name": "michaelvl/sigstore-in-toto-workshop",
+              "git_commits_url": "https://api.github.com/repos/michaelvl/sigstore-in-toto-workshop/git/commits{/sha}",
+              "git_refs_url": "https://api.github.com/repos/michaelvl/sigstore-in-toto-workshop/git/refs{/sha}",
+              "git_tags_url": "https://api.github.com/repos/michaelvl/sigstore-in-toto-workshop/git/tags{/sha}",
+              "git_url": "git://github.com/michaelvl/sigstore-in-toto-workshop.git",
+              "has_discussions": false,
+              "has_downloads": true,
+              "has_issues": true,
+              "has_pages": false,
+              "has_projects": true,
+              "has_wiki": false,
+              "homepage": null,
+              "hooks_url": "https://api.github.com/repos/michaelvl/sigstore-in-toto-workshop/hooks",
+              "html_url": "https://github.com/michaelvl/sigstore-in-toto-workshop",
+              "id": 746293464,
+              "is_template": false,
+              "issue_comment_url": "https://api.github.com/repos/michaelvl/sigstore-in-toto-workshop/issues/comments{/number}",
+              "issue_events_url": "https://api.github.com/repos/michaelvl/sigstore-in-toto-workshop/issues/events{/number}",
+              "issues_url": "https://api.github.com/repos/michaelvl/sigstore-in-toto-workshop/issues{/number}",
+              "keys_url": "https://api.github.com/repos/michaelvl/sigstore-in-toto-workshop/keys{/key_id}",
+              "labels_url": "https://api.github.com/repos/michaelvl/sigstore-in-toto-workshop/labels{/name}",
+              "language": "Smarty",
+              "languages_url": "https://api.github.com/repos/michaelvl/sigstore-in-toto-workshop/languages",
+              "license": {
+                "key": "apache-2.0",
+                "name": "Apache License 2.0",
+                "node_id": "MDc6TGljZW5zZTI=",
+                "spdx_id": "Apache-2.0",
+                "url": "https://api.github.com/licenses/apache-2.0"
+              },
+              "master_branch": "main",
+              "merges_url": "https://api.github.com/repos/michaelvl/sigstore-in-toto-workshop/merges",
+              "milestones_url": "https://api.github.com/repos/michaelvl/sigstore-in-toto-workshop/milestones{/number}",
+              "mirror_url": null,
+              "name": "sigstore-in-toto-workshop",
+              "node_id": "R_kgDOLHuI2A",
+              "notifications_url": "https://api.github.com/repos/michaelvl/sigstore-in-toto-workshop/notifications{?since,all,participating}",
+              "open_issues": 0,
+              "open_issues_count": 0,
+              "owner": {
+                "avatar_url": "https://avatars.githubusercontent.com/u/6823408?v=4",
+                "email": "mvl.gh@network42.dk",
+                "events_url": "https://api.github.com/users/michaelvl/events{/privacy}",
+                "followers_url": "https://api.github.com/users/michaelvl/followers",
+                "following_url": "https://api.github.com/users/michaelvl/following{/other_user}",
+                "gists_url": "https://api.github.com/users/michaelvl/gists{/gist_id}",
+                "gravatar_id": "",
+                "html_url": "https://github.com/michaelvl",
+                "id": 6823408,
+                "login": "michaelvl",
+                "name": "michaelvl",
+                "node_id": "MDQ6VXNlcjY4MjM0MDg=",
+                "organizations_url": "https://api.github.com/users/michaelvl/orgs",
+                "received_events_url": "https://api.github.com/users/michaelvl/received_events",
+                "repos_url": "https://api.github.com/users/michaelvl/repos",
+                "site_admin": false,
+                "starred_url": "https://api.github.com/users/michaelvl/starred{/owner}{/repo}",
+                "subscriptions_url": "https://api.github.com/users/michaelvl/subscriptions",
+                "type": "User",
+                "url": "https://api.github.com/users/michaelvl"
+              },
+              "private": false,
+              "pulls_url": "https://api.github.com/repos/michaelvl/sigstore-in-toto-workshop/pulls{/number}",
+              "pushed_at": 1707416576,
+              "releases_url": "https://api.github.com/repos/michaelvl/sigstore-in-toto-workshop/releases{/id}",
+              "size": 64,
+              "ssh_url": "git@github.com:michaelvl/sigstore-in-toto-workshop.git",
+              "stargazers": 0,
+              "stargazers_count": 0,
+              "stargazers_url": "https://api.github.com/repos/michaelvl/sigstore-in-toto-workshop/stargazers",
+              "statuses_url": "https://api.github.com/repos/michaelvl/sigstore-in-toto-workshop/statuses/{sha}",
+              "subscribers_url": "https://api.github.com/repos/michaelvl/sigstore-in-toto-workshop/subscribers",
+              "subscription_url": "https://api.github.com/repos/michaelvl/sigstore-in-toto-workshop/subscription",
+              "svn_url": "https://github.com/michaelvl/sigstore-in-toto-workshop",
+              "tags_url": "https://api.github.com/repos/michaelvl/sigstore-in-toto-workshop/tags",
+              "teams_url": "https://api.github.com/repos/michaelvl/sigstore-in-toto-workshop/teams",
+              "topics": [],
+              "trees_url": "https://api.github.com/repos/michaelvl/sigstore-in-toto-workshop/git/trees{/sha}",
+              "updated_at": "2024-02-07T17:04:15Z",
+              "url": "https://github.com/michaelvl/sigstore-in-toto-workshop",
+              "visibility": "public",
+              "watchers": 0,
+              "watchers_count": 0,
+              "web_commit_signoff_required": false
+            },
+            "sender": {
+              "avatar_url": "https://avatars.githubusercontent.com/u/6823408?v=4",
+              "events_url": "https://api.github.com/users/michaelvl/events{/privacy}",
+              "followers_url": "https://api.github.com/users/michaelvl/followers",
+              "following_url": "https://api.github.com/users/michaelvl/following{/other_user}",
+              "gists_url": "https://api.github.com/users/michaelvl/gists{/gist_id}",
+              "gravatar_id": "",
+              "html_url": "https://github.com/michaelvl",
+              "id": 6823408,
+              "login": "michaelvl",
+              "node_id": "MDQ6VXNlcjY4MjM0MDg=",
+              "organizations_url": "https://api.github.com/users/michaelvl/orgs",
+              "received_events_url": "https://api.github.com/users/michaelvl/received_events",
+              "repos_url": "https://api.github.com/users/michaelvl/repos",
+              "site_admin": false,
+              "starred_url": "https://api.github.com/users/michaelvl/starred{/owner}{/repo}",
+              "subscriptions_url": "https://api.github.com/users/michaelvl/subscriptions",
+              "type": "User",
+              "url": "https://api.github.com/users/michaelvl"
+            }
+          },
+          "github_head_ref": "",
+          "github_ref": "refs/heads/main",
+          "github_ref_type": "branch",
+          "github_repository_id": "746293464",
+          "github_repository_owner": "michaelvl",
+          "github_repository_owner_id": "6823408",
+          "github_run_attempt": "6",
+          "github_run_id": "7834161718",
+          "github_run_number": "27",
+          "github_sha1": "bd996cf46b61474143057edbee8d0a26ee20632f"
+        },
+        "parameters": {}
+      },
+      "materials": [
+        {
+          "digest": {
+            "sha1": "bd996cf46b61474143057edbee8d0a26ee20632f"
+          },
+          "uri": "git+https://github.com/michaelvl/sigstore-in-toto-workshop@refs/heads/main"
+        }
+      ],
+      "metadata": {
+        "buildInvocationID": "7834161718-6",
+        "completeness": {
+          "environment": false,
+          "materials": false,
+          "parameters": true
+        },
+        "reproducible": false
+      }
+    },
+    "predicateType": "https://slsa.dev/provenance/v0.2",
+    "subject": [
+      {
+        "digest": {
+          "sha256": "8f2b07277f2efbca0b0361222dc2eaaa8bc8956165b4ef9a2b47dd1b4f982145"
+        },
+        "name": "ghcr.io/michaelvl/sigstore-in-toto-workshop"
+      }
+    ]
+  },
+  "sbom":  {
+    "_type": "https://in-toto.io/Statement/v0.1",
+    "predicate": {
+      "SPDXID": "SPDXRef-DOCUMENT",
+      "creationInfo": {
+        "created": "2024-02-10T16:10:13Z",
+        "creators": [
+          "Organization: Anchore, Inc",
+          "Tool: syft-0.103.1"
+        ],
+        "licenseListVersion": "3.22"
+      },
+      "dataLicense": "CC0-1.0",
+      "documentNamespace": "https://anchore.com/syft/image/ghcr.io/michaelvl/sigstore-in-toto-workshop-3d41d598-d2c3-4ea9-b18d-f83478836c1c",
+      "files": [
+        {
+          "SPDXID": "SPDXRef-File-app-main-609c8cfde70c7826",
+          "checksums": [
+            {
+              "algorithm": "SHA1",
+              "checksumValue": "0000000000000000000000000000000000000000"
+            }
+          ],
+          "comment": "layerID: sha256:0473879f9b23adc5bd0e352f4b3b280a10414329329ca1c3452843e17f66b246",
+          "copyrightText": "",
+          "fileName": "/app/main",
+          "licenseConcluded": "NOASSERTION"
+        }
+      ],
+      "name": "ghcr.io/michaelvl/sigstore-in-toto-workshop",
+      "packages": [
+        {
+          "SPDXID": "SPDXRef-Package-go-module-github.com-michaelvl-sigstore-in-toto-workshop-c607466c334f1584",
+          "copyrightText": "NOASSERTION",
+          "downloadLocation": "NOASSERTION",
+          "externalRefs": [
+            {
+              "referenceCategory": "SECURITY",
+              "referenceLocator": "cpe:2.3:a:michaelvl:sigstore-in-toto-workshop:\\(devel\\):*:*:*:*:*:*:*",
+              "referenceType": "cpe23Type"
+            },
+            {
+              "referenceCategory": "SECURITY",
+              "referenceLocator": "cpe:2.3:a:michaelvl:sigstore_in_toto_workshop:\\(devel\\):*:*:*:*:*:*:*",
+              "referenceType": "cpe23Type"
+            },
+            {
+              "referenceCategory": "PACKAGE-MANAGER",
+              "referenceLocator": "pkg:golang/github.com/michaelvl/sigstore-in-toto-workshop@(devel)",
+              "referenceType": "purl"
+            }
+          ],
+          "filesAnalyzed": false,
+          "licenseConcluded": "NOASSERTION",
+          "licenseDeclared": "NOASSERTION",
+          "name": "github.com/michaelvl/sigstore-in-toto-workshop",
+          "sourceInfo": "acquired package info from go module information: /app/main",
+          "supplier": "NOASSERTION",
+          "versionInfo": "(devel)"
+        },
+        {
+          "SPDXID": "SPDXRef-Package-go-module-go.uber.org-multierr-b2e0189c412154f5",
+          "checksums": [
+            {
+              "algorithm": "SHA256",
+              "checksumValue": "4b487868dcef7dc16c0b77511758cba1aa2fee845a2aa4460bfa54109db2bcf4"
+            }
+          ],
+          "copyrightText": "NOASSERTION",
+          "downloadLocation": "NOASSERTION",
+          "externalRefs": [
+            {
+              "referenceCategory": "PACKAGE-MANAGER",
+              "referenceLocator": "pkg:golang/go.uber.org/multierr@v1.10.0",
+              "referenceType": "purl"
+            }
+          ],
+          "filesAnalyzed": false,
+          "licenseConcluded": "NOASSERTION",
+          "licenseDeclared": "NOASSERTION",
+          "name": "go.uber.org/multierr",
+          "sourceInfo": "acquired package info from go module information: /app/main",
+          "supplier": "NOASSERTION",
+          "versionInfo": "v1.10.0"
+        },
+        {
+          "SPDXID": "SPDXRef-Package-go-module-go.uber.org-zap-36be6f4d8c7fb5cb",
+          "checksums": [
+            {
+              "algorithm": "SHA256",
+              "checksumValue": "b08ee4e8bf795ce292dbcd4d85528e14250d22fbfd7b4c38045f0ddeefad091a"
+            }
+          ],
+          "copyrightText": "NOASSERTION",
+          "downloadLocation": "NOASSERTION",
+          "externalRefs": [
+            {
+              "referenceCategory": "PACKAGE-MANAGER",
+              "referenceLocator": "pkg:golang/go.uber.org/zap@v1.26.0",
+              "referenceType": "purl"
+            }
+          ],
+          "filesAnalyzed": false,
+          "licenseConcluded": "NOASSERTION",
+          "licenseDeclared": "NOASSERTION",
+          "name": "go.uber.org/zap",
+          "sourceInfo": "acquired package info from go module information: /app/main",
+          "supplier": "NOASSERTION",
+          "versionInfo": "v1.26.0"
+        },
+        {
+          "SPDXID": "SPDXRef-Package-go-module-stdlib-852791532a2f170c",
+          "copyrightText": "NOASSERTION",
+          "downloadLocation": "NOASSERTION",
+          "externalRefs": [
+            {
+              "referenceCategory": "SECURITY",
+              "referenceLocator": "cpe:2.3:a:golang:go:1.21.6:-:*:*:*:*:*:*",
+              "referenceType": "cpe23Type"
+            },
+            {
+              "referenceCategory": "PACKAGE-MANAGER",
+              "referenceLocator": "pkg:golang/stdlib@1.21.6",
+              "referenceType": "purl"
+            }
+          ],
+          "filesAnalyzed": false,
+          "licenseConcluded": "NOASSERTION",
+          "licenseDeclared": "BSD-3-Clause",
+          "name": "stdlib",
+          "sourceInfo": "acquired package info from go module information: /app/main",
+          "supplier": "NOASSERTION",
+          "versionInfo": "go1.21.6"
+        },
+        {
+          "SPDXID": "SPDXRef-DocumentRoot-Image-ghcr.io-michaelvl-sigstore-in-toto-workshop",
+          "checksums": [
+            {
+              "algorithm": "SHA256",
+              "checksumValue": "d0d211c65787fb41237f66696c189043930dad3b7d28a59b6bb21b9aa546b202"
+            }
+          ],
+          "downloadLocation": "NOASSERTION",
+          "externalRefs": [
+            {
+              "referenceCategory": "PACKAGE-MANAGER",
+              "referenceLocator": "pkg:oci/ghcr.io/michaelvl/sigstore-in-toto-workshop@sha256:d0d211c65787fb41237f66696c189043930dad3b7d28a59b6bb21b9aa546b202?arch=amd64",
+              "referenceType": "purl"
+            }
+          ],
+          "filesAnalyzed": false,
+          "name": "ghcr.io/michaelvl/sigstore-in-toto-workshop",
+          "primaryPackagePurpose": "CONTAINER",
+          "supplier": "NOASSERTION",
+          "versionInfo": "sha256:8f2b07277f2efbca0b0361222dc2eaaa8bc8956165b4ef9a2b47dd1b4f982145"
+        }
+      ],
+      "relationships": [
+        {
+          "comment": "evident-by: indicates the package's existence is evident by the given file",
+          "relatedSpdxElement": "SPDXRef-File-app-main-609c8cfde70c7826",
+          "relationshipType": "OTHER",
+          "spdxElementId": "SPDXRef-Package-go-module-go.uber.org-zap-36be6f4d8c7fb5cb"
+        },
+        {
+          "comment": "evident-by: indicates the package's existence is evident by the given file",
+          "relatedSpdxElement": "SPDXRef-File-app-main-609c8cfde70c7826",
+          "relationshipType": "OTHER",
+          "spdxElementId": "SPDXRef-Package-go-module-stdlib-852791532a2f170c"
+        },
+        {
+          "comment": "evident-by: indicates the package's existence is evident by the given file",
+          "relatedSpdxElement": "SPDXRef-File-app-main-609c8cfde70c7826",
+          "relationshipType": "OTHER",
+          "spdxElementId": "SPDXRef-Package-go-module-go.uber.org-multierr-b2e0189c412154f5"
+        },
+        {
+          "comment": "evident-by: indicates the package's existence is evident by the given file",
+          "relatedSpdxElement": "SPDXRef-File-app-main-609c8cfde70c7826",
+          "relationshipType": "OTHER",
+          "spdxElementId": "SPDXRef-Package-go-module-github.com-michaelvl-sigstore-in-toto-workshop-c607466c334f1584"
+        },
+        {
+          "relatedSpdxElement": "SPDXRef-Package-go-module-github.com-michaelvl-sigstore-in-toto-workshop-c607466c334f1584",
+          "relationshipType": "CONTAINS",
+          "spdxElementId": "SPDXRef-DocumentRoot-Image-ghcr.io-michaelvl-sigstore-in-toto-workshop"
+        },
+        {
+          "relatedSpdxElement": "SPDXRef-Package-go-module-go.uber.org-multierr-b2e0189c412154f5",
+          "relationshipType": "CONTAINS",
+          "spdxElementId": "SPDXRef-DocumentRoot-Image-ghcr.io-michaelvl-sigstore-in-toto-workshop"
+        },
+        {
+          "relatedSpdxElement": "SPDXRef-Package-go-module-go.uber.org-zap-36be6f4d8c7fb5cb",
+          "relationshipType": "CONTAINS",
+          "spdxElementId": "SPDXRef-DocumentRoot-Image-ghcr.io-michaelvl-sigstore-in-toto-workshop"
+        },
+        {
+          "relatedSpdxElement": "SPDXRef-Package-go-module-stdlib-852791532a2f170c",
+          "relationshipType": "CONTAINS",
+          "spdxElementId": "SPDXRef-DocumentRoot-Image-ghcr.io-michaelvl-sigstore-in-toto-workshop"
+        },
+        {
+          "relatedSpdxElement": "SPDXRef-DocumentRoot-Image-ghcr.io-michaelvl-sigstore-in-toto-workshop",
+          "relationshipType": "DESCRIBES",
+          "spdxElementId": "SPDXRef-DOCUMENT"
+        }
+      ],
+      "spdxVersion": "SPDX-2.3"
+    },
+    "predicateType": "https://spdx.dev/Document",
+    "subject": [
+      {
+        "digest": {
+          "sha256": "8f2b07277f2efbca0b0361222dc2eaaa8bc8956165b4ef9a2b47dd1b4f982145"
+        },
+        "name": "ghcr.io/michaelvl/sigstore-in-toto-workshop"
+      }
+    ]
+  },
+  "pr": {
+    "_type": "https://in-toto.io/Statement/v0.1",
+    "predicate": {
+      "pull_requests": {
+        "associatedPullRequests": {
+          "nodes": []
+        },
+        "commitUrl": "https://github.com/michaelvl/sigstore-in-toto-workshop/commit/bd996cf46b61474143057edbee8d0a26ee20632f"
+      },
+      "repository": {
+        "digest": {
+          "sha1": "bd996cf46b61474143057edbee8d0a26ee20632f"
+        },
+        "name": "/sigstore-in-toto-workshop",
+        "ref": "refs/heads/main"
+      }
+    },
+    "predicateType": "https://github.com/michaelvl/gha-reusable-workflows/pr-provenance",
+    "subject": [
+      {
+        "digest": {
+          "sha256": "8f2b07277f2efbca0b0361222dc2eaaa8bc8956165b4ef9a2b47dd1b4f982145"
+        },
+        "name": "ghcr.io/michaelvl/sigstore-in-toto-workshop"
+      }
+    ]
+  },
+  "vuln": {
+    "_type": "https://in-toto.io/Statement/v0.1",
+    "predicate": {
+      "invocation": {
+        "builder.id": "",
+        "event_id": "",
+        "parameters": null,
+        "uri": ""
+      },
+      "metadata": {
+        "scanFinishedOn": "2024-02-10T16:10:59.727268223Z",
+        "scanStartedOn": "2024-02-10T16:10:59.727268223Z"
+      },
+      "scanner": {
+        "db": {
+          "uri": "",
+          "version": ""
+        },
+        "result": {
+          "ArtifactName": "ghcr.io/michaelvl/sigstore-in-toto-workshop@sha256:8f2b07277f2efbca0b0361222dc2eaaa8bc8956165b4ef9a2b47dd1b4f982145",
+          "ArtifactType": "container_image",
+          "CreatedAt": "2024-02-10T16:10:59.727188865Z",
+          "Metadata": {
+            "DiffIDs": [
+              "sha256:9b55516fead0e44f62131111f572a0899beb1e46955b5a065070a6e01ef83f35",
+              "sha256:0473879f9b23adc5bd0e352f4b3b280a10414329329ca1c3452843e17f66b246"
+            ],
+            "ImageConfig": {
+              "architecture": "amd64",
+              "config": {
+                "Entrypoint": [
+                  "/app/main"
+                ],
+                "Env": [
+                  "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+                ],
+                "Labels": {
+                  "org.opencontainers.image.created": "2024-02-10T16:08:47.217Z",
+                  "org.opencontainers.image.description": "Sigstore and in-toto workshop",
+                  "org.opencontainers.image.licenses": "Apache-2.0",
+                  "org.opencontainers.image.revision": "bd996cf46b61474143057edbee8d0a26ee20632f",
+                  "org.opencontainers.image.source": "https://github.com/michaelvl/sigstore-in-toto-workshop",
+                  "org.opencontainers.image.title": "sigstore-in-toto-workshop",
+                  "org.opencontainers.image.url": "https://github.com/michaelvl/sigstore-in-toto-workshop",
+                  "org.opencontainers.image.version": "main"
+                },
+                "User": "10000",
+                "WorkingDir": "/app"
+              },
+              "created": "2024-02-10T16:09:03.554943984Z",
+              "history": [
+                {
+                  "comment": "buildkit.dockerfile.v0",
+                  "created": "2024-02-10T16:08:49.867609229Z",
+                  "created_by": "WORKDIR /app"
+                },
+                {
+                  "comment": "buildkit.dockerfile.v0",
+                  "created": "2024-02-10T16:09:03.554943984Z",
+                  "created_by": "COPY /app/main . # buildkit"
+                },
+                {
+                  "comment": "buildkit.dockerfile.v0",
+                  "created": "2024-02-10T16:09:03.554943984Z",
+                  "created_by": "USER 10000",
+                  "empty_layer": true
+                },
+                {
+                  "comment": "buildkit.dockerfile.v0",
+                  "created": "2024-02-10T16:09:03.554943984Z",
+                  "created_by": "ENTRYPOINT [\"/app/main\"]",
+                  "empty_layer": true
+                }
+              ],
+              "os": "linux",
+              "rootfs": {
+                "diff_ids": [
+                  "sha256:9b55516fead0e44f62131111f572a0899beb1e46955b5a065070a6e01ef83f35",
+                  "sha256:0473879f9b23adc5bd0e352f4b3b280a10414329329ca1c3452843e17f66b246"
+                ],
+                "type": "layers"
+              }
+            },
+            "ImageID": "sha256:67a9b75cb780e856d055169b3970da92ea2651a52b48165f0acb1a18c326b0bc",
+            "RepoDigests": [
+              "ghcr.io/michaelvl/sigstore-in-toto-workshop@sha256:8f2b07277f2efbca0b0361222dc2eaaa8bc8956165b4ef9a2b47dd1b4f982145"
+            ]
+          },
+          "SchemaVersion": 2
+        },
+        "uri": "pkg:github/aquasecurity/trivy@0.48.1",
+        "version": "0.48.1"
+      }
+    },
+    "predicateType": "https://cosign.sigstore.dev/attestation/vuln/v1",
+    "subject": [
+      {
+        "digest": {
+          "sha256": "8f2b07277f2efbca0b0361222dc2eaaa8bc8956165b4ef9a2b47dd1b4f982145"
+        },
+        "name": "ghcr.io/michaelvl/sigstore-in-toto-workshop"
+      }
+    ]
+  }
+}

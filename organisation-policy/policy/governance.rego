@@ -2,18 +2,16 @@ package governance
 
 default allow = false
 
-provenance_attestations :=
-    [att | json.unmarshal(input[i].Attestation).predicateType == "https://slsa.dev/provenance/v0.2"; att := json.unmarshal(input[i].Attestation)]
+provenance_attestations := [input[i] | input[i].predicateType == "https://slsa.dev/provenance/v0.2"]
 
-sbom_attestations :=
-    [att | json.unmarshal(input[i].Attestation).predicateType == "https://spdx.dev/Document"; att := json.unmarshal(input[i].Attestation)]
+sbom_attestations :=[input[i] | input[i].predicateType == "https://spdx.dev/Document"]
 
-vuln_attestations :=
-    [att | json.unmarshal(input[i].Attestation).predicateType == "https://cosign.sigstore.dev/attestation/vuln/v1"; att := json.unmarshal(input[i].Attestation)]
+vuln_attestations := [input[i] | input[i].predicateType == "https://cosign.sigstore.dev/attestation/vuln/v1"]
 
+pr_attestations := [input[i] | input[i].predicateType == "https://github.com/michaelvl/gha-reusable-workflows/pr-provenance" ]
 
 allow {
-    violations := provenance_violations | sbom_violations | vuln_violations
+    violations := provenance_violations | sbom_violations | vuln_violations | pr_violations
     print(violations)
     count(violations) == 0
 }
@@ -31,4 +29,9 @@ sbom_violations[msg] {
 vuln_violations[msg] {
     count(vuln_attestations) == 0
     msg:= "no vuln attestation"
+}
+
+pr_violations[msg] {
+    count(pr_attestations) == 0
+    msg:= "no pr attestation"
 }

@@ -44,9 +44,16 @@ jobs:
         path: gha-reusable-workflows
         persist-credentials: false
 
+    - name: Artifact-underwriter install
+      uses: ./gha-reusable-workflows/.github/actions/artifact-underwriter
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+
     - name: Policy check
+      working-directory: ./gha-reusable-workflows
       run: |
-        gha-reusable-workflows/scripts/vsa-poc.sh "PASSED" "${{ needs.detect-workflow.outputs.repository }}" "${{ needs.detect-workflow.outputs.ref }}" > vsa.json
+        artifact-underwriter -d evaluate-policy ghcr.io/${{ github.repository }}@${{ inputs.digest }} \
+          --policy organisation-policy/container-policy.yaml --output-vsa vsa.json
 
     - name: Login to GitHub Container Registry
       uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
@@ -57,7 +64,7 @@ jobs:
 
     - name: Attest verification summary
       run: |
-        cosign attest --predicate="vsa.json" \
+        cosign attest --predicate="./gha-reusable-workflows/vsa.json" \
           --type "https://slsa.dev/verification_summary/v1" \
           --yes \
           ghcr.io/${{ github.repository }}@${{ inputs.digest }}

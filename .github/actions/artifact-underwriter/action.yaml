@@ -1,0 +1,30 @@
+name: "artifact-underwriter"
+description: "Installs michaelvl/artifact-underwriter tool"
+
+inputs:
+  version:
+    description: "Version to install"
+    default: 0.0.1
+  token:
+    description: "GitHub token - used to download release assets"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Download
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.token }}
+      run: |
+        gh release download \
+          --repo michaelvl/artifact-underwriter \
+          --pattern "artifact-underwriter_${{ inputs.version }}_linux_amd64.tar.gz" "${{ inputs.version }}"
+
+        tar xvf "artifact-underwriter_${{ inputs.version }}_linux_amd64.tar.gz" artifact-underwriter
+
+        mkdir -p $HOME/.bin/artifact-underwriter
+        mv ./artifact-underwriter $HOME/.bin/artifact-underwriter
+        rm "artifact-underwriter_${{ inputs.version }}_linux_amd64.tar.gz"
+        
+        echo "$HOME/.bin/artifact-underwriter" >> $GITHUB_PATH
+        $HOME/.bin/artifact-underwriter/artifact-underwriter version

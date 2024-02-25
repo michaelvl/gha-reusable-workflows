@@ -53,7 +53,7 @@ jobs:
       working-directory: ./gha-reusable-workflows
       run: |
         artifact-underwriter -d evaluate-policy ghcr.io/${{ github.repository }}@${{ inputs.digest }} \
-          --policy organisation-policy/container-policy.yaml --output-vsa vsa.json
+          --policy organisation-policy/container-policy.yaml --output-vsa-predicate vsa.json
 
     - name: Login to GitHub Container Registry
       uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0

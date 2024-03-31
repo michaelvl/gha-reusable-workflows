@@ -77,13 +77,13 @@ produced pull-request attestation are summarised below.
         "nodes": [
           {
             "author": {
-			  ...           # Who created the PR
+              ...           # Who created the PR
             },
             "approvers": {
-			  ...           # Who approved the PR
+              ...           # Who approved the PR
             },
             "assignees": {
-			  ...           # PR review assignees
+              ...           # PR review assignees
             },
             "body": ...,    # Body text of PR
             "mergedAt": ...
@@ -101,7 +101,7 @@ produced pull-request attestation are summarised below.
       },
       "name": ...
       "ref": ...
-	   ...
+       ...
     }
   }
 }

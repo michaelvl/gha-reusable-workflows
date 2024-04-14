@@ -25,6 +25,20 @@ query ($repoOwner: String!, $repoName: String!, $sha: String!) {
                 url
               }
             }
+            mergedBy {
+              login
+            }
+            approvers: reviews(states: APPROVED, first: 10) {
+              nodes {
+                author {
+                  ... on User {
+                    name
+                    login
+                  }
+                }
+                state
+              }
+            }
             baseRefOid
             headRefName
             headRefOid

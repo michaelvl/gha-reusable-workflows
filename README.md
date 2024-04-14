@@ -23,7 +23,7 @@ Legend
 - :tophat: Trusted process through separation of duties.
 - :x: No mitigation
 
-Mitigation mechanisms:
+Mitigation mechanisms for threat-points from figure above:
 
 - A. Submit unauthorized source:
   - :memo: PR provenance attestation showing PR status, who reviewed, approved and merged etc.
@@ -40,7 +40,8 @@ Mitigation mechanisms:
 - E. Compromised build process
   - :tophat: Separated workflows using GitHub [reusable workflows](https://docs.github.com/en/actions/using-workflows/reusing-workflows)
   - :memo: SLSA provenance using the [slsa-github-generator](https://github.com/slsa-framework/slsa-github-generator)
-  - :memo: Organization policies applied and produce [Verification Summary Attestation (VSA)](https://slsa.dev/spec/v1.0/verification_summary)
+  - :no_entry: Apply organisation policies using [artifact-underwriter](https://github.com/michaelvl/artifact-underwriter)
+  - :memo: Generate [Verification Summary Attestation (VSA)](https://slsa.dev/spec/v1.0/verification_summary) based on organisation policy verification status
 - F. Upload modified artifacts
   - :memo: Container digest used throughout workflows
   - :memo: Container signed
@@ -54,6 +55,57 @@ Mitigation mechanisms:
 
 Note, that SLSA levels describe the build-phase and does not cover the
 source-phase, i.e. tampering with the source prior to building.
+
+## Pull-request Attestation
+
+The [policy-verification workflow](.github/workflows/policy-verification.yaml) applies Rego-based organisation policies to the attestions produced by prior workflows using [artifact-underwriter](https://github.com/michaelvl/artifact-underwriter). Based on the policy verification result, a [Verification Summary Attestation (VSA)](https://slsa.dev/spec/v1.0/verification_summary) is issued.
+
+The attestations produced by the workflows are generally standardised,
+except for the pull-request attestation since no standard exists. The
+produced pull-request attestation are summarised below.
+
+```yaml
+{
+  "_type": "https://in-toto.io/Statement/v0.1",
+  "predicateType": "https://github.com/michaelvl/gha-reusable-workflows/pr-provenance",
+  "subject": [
+     ...
+  ],
+  "predicate": {
+    "pull_requests": {
+      "associatedPullRequests": {
+        "nodes": [
+          {
+            "author": {
+              ...           # Who created the PR
+            },
+            "approvers": {
+              ...           # Who approved the PR
+            },
+            "assignees": {
+              ...           # PR review assignees
+            },
+            "body": ...,    # Body text of PR
+            "mergedAt": ...
+            "mergedBy": ...   # Who merged the PR
+            "reviewDecision": # Overall review state
+            "state": "MERGED",
+            "title": ...
+          }
+        ]
+      },
+    },
+    "repository": {         # Git references
+      "digest": {
+        "sha1": ...
+      },
+      "name": ...
+      "ref": ...
+       ...
+    }
+  }
+}
+```
 
 ## Links
 

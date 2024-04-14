@@ -1,0 +1,66 @@
+on:
+  workflow_call:
+
+jobs:
+  detect-workflow:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # Needed to detect the current reusable repository and ref
+    outputs:
+      repository: ${{ steps.detect.outputs.repository }}
+      ref: ${{ steps.detect.outputs.ref }}
+      workflow: ${{ steps.detect.outputs.workflow }}
+    steps:
+      - name: Detect this workflow repository and ref
+        id: detect
+        uses: slsa-framework/slsa-github-generator/.github/actions/detect-workflow-js@07e64b653f10a80b6510f4568f685f8b7b9ea830 # v1.9.0
+
+  source-attestations:
+    permissions:
+      id-token: write
+      contents: read
+      packages: write
+      pull-requests: read
+    runs-on: ubuntu-latest
+    needs:
+    - detect-workflow
+    steps:
+    - name: Checkout
+      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+    - name: Run OSSF scorecard analysis
+      uses: ossf/scorecard-action@0864cf19026789058feabb7e87baa5f140aac736 # v2.3.1
+      with:
+        results_file: scorecard.json
+        results_format: json
+
+    - name: Checkout Workflows Repo
+      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      with:
+        repository: ${{ needs.detect-workflow.outputs.repository }}
+        ref: ${{ needs.detect-workflow.outputs.ref }}
+        path: gha-reusable-workflows
+        persist-credentials: false
+
+    - name: Install gitsign
+      uses: ./gha-reusable-workflows/.github/actions/gitsign
+
+    - name: PR provenance
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        gha-reusable-workflows/scripts/pr-provenance.sh "${{ github.repository_owner }}" "${{ github.event.repository.name }}" "${{ github.ref }}" "${{ github.sha }}" > pr.json
+        cat pr.json
+
+    - name: Attest provenance
+      run: |
+        set -e
+        git config --global user.email "source-attester@noreply.github.com"
+        git config --global user.name "source-attester"
+
+        git fetch origin refs/attestations/commits:refs/attestations/commits || true
+        gitsign-attest -f scorecard.json --type custom
+        gitsign-attest -f pr.json --type custom
+
+        git push origin refs/attestations/commits

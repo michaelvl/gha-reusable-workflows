@@ -1,0 +1,27 @@
+name: "gitsign"
+description: "Installs sigstore gitsig"
+
+inputs:
+  version:
+    description: "Version to install"
+    default: 0.10.1
+  token:
+    description: "GitHub token - used to download release assets"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Download
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.token }}
+      run: |
+        gh release download \
+          --repo sigstore/gitsign \
+          --pattern "gitsign_${{ inputs.version }}_linux_amd64" "${{ inputs.version }}"
+
+        mkdir -p $HOME/.bin/gitsign
+        mv ./gitsign $HOME/.bin/gitsign
+        
+        echo "$HOME/.bin/gitsign" >> $GITHUB_PATH
+        $HOME/.bin/gitsign/gitsign version

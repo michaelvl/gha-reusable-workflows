@@ -59,7 +59,7 @@ jobs:
         git config --global user.name "source-attester"
 
         git fetch origin refs/attestations/commits:refs/attestations/commits || true
-        gitsign-attest -f scorecard.json --type custom
-        gitsign-attest -f pr.json --type custom
+        gitsign attest -f scorecard.json --type custom
+        gitsign attest -f pr.json --type custom
 
         git push origin refs/attestations/commits

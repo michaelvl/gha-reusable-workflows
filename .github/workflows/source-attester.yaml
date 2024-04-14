@@ -19,7 +19,7 @@ jobs:
   source-attestations:
     permissions:
       id-token: write
-      contents: read
+      contents: write
       pull-requests: read
     runs-on: ubuntu-latest
     needs:

@@ -54,7 +54,7 @@ jobs:
 
     - name: Attest provenance
       run: |
-        set -e
+        set -ex
         git config --global user.email "source-attester@noreply.github.com"
         git config --global user.name "source-attester"
 

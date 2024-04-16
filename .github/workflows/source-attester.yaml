@@ -42,8 +42,9 @@ jobs:
         path: gha-reusable-workflows
         persist-credentials: false
 
-    - name: Install gitsign
-      uses: ./gha-reusable-workflows/.github/actions/gitsign
+    #- name: Install gitsign
+    #  uses: ./gha-reusable-workflows/.github/actions/gitsign
+    - uses: chainguard-dev/actions/setup-gitsign@main
 
     - name: PR provenance
       env:
